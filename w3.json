@@ -1,0 +1,320 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 45
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -896,
+        352
+      ],
+      "id": "175a8e1b-a522-4a4f-a5bb-7dffa859e0cb",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "email": "={{ $('Nimbus Agent').item.json.output.lead.job_id }}@upwork.com",
+        "additionalFields": {
+          "companyName": "={{ $('Nimbus Agent').item.json.output.lead.company_name }}",
+          "contactOwner": 79488043,
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "source_id",
+                "value": "={{ $('Nimbus Agent').item.json.output.lead.job_id }}@upwork.com"
+              },
+              {
+                "property": "job_link",
+                "value": "={{ $('Nimbus Agent').item.json.output.lead.job_url }}"
+              },
+              {
+                "property": "contact_skills",
+                "value": "={{ $('Nimbus Agent').item.json.output.lead.skills.join(';') }}"
+              },
+              {
+                "property": "contact_job_function",
+                "value": "={{ $('Nimbus Agent').item.json.output.lead.job_function.join(';') }}"
+              },
+              {
+                "property": "outreach_role",
+                "value": "={{ $('Nimbus Agent').item.json.output.lead.job_title.join(';') }}"
+              },
+              {
+                "property": "outreach_confidence",
+                "value": "={{ $('Nimbus Agent').item.json.output.lead.confidence }}"
+              },
+              {
+                "property": "cadence_message_1",
+                "value": "={{ $json.output.cadence_message_1 }}"
+              },
+              {
+                "property": "cadence_message_2",
+                "value": "={{ $json.output.cadence_message_2 }}"
+              },
+              {
+                "property": "cadence_message_3",
+                "value": "={{ $json.output.cadence_message_3 }}"
+              },
+              {
+                "property": "cadence_message_4",
+                "value": "={{ $json.output.cadence_message_4 }}"
+              },
+              {
+                "property": "cadence_template",
+                "value": "={{ $json.output.cadence_template }}"
+              }
+            ]
+          },
+          "firstName": "={{ $('Nimbus Agent').item.json.output.lead.job_poster.match(new RegExp(\"Not Identified|Not disclosed|Not known|None identified|No company|No brand|Twenty|GHL|\" + $('Nimbus Agent').item.json.output.lead.company_name, \"i\")) ? \"\" : $('Nimbus Agent').item.json.output.lead.job_poster.trim().split(' ')[0] }}",
+          "industry": "={{ $('Nimbus Agent').item.json.output.lead.industry[0].toSentenceCase() }}",
+          "lastName": "={{ $('Nimbus Agent').item.json.output.lead.job_poster.match(new RegExp(\"Not Identified|Not disclosed|Not known|None identified|No company|No brand|Twenty|GHL|\" + $('Nimbus Agent').item.json.output.lead.company_name, \"i\")) ? \"\" : ($('Nimbus Agent').item.json.output.lead.job_poster.trim().includes(' ') ? $('Nimbus Agent').item.json.output.lead.job_poster.trim().split(' ').slice(1).join(' ') : \"\") }}",
+          "membershipNote": "=Title: {{ $('Loop Over Items1').item.json.title }}\nDescription: {{ $('Loop Over Items1').item.json.description }}\n\nReason: {{ $('Nimbus Agent').item.json.output.lead.reason }}\n\nMessaging Reason: {{ $json.output.reasoning }}",
+          "websiteUrl": "={{ $('Nimbus Agent').item.json.output.lead.company_website }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        -144
+      ],
+      "id": "e8db7ada-dda9-4c45-a16f-0d89cf18517c",
+      "name": "Create or update a contact",
+      "credentials": {
+        "hubspotOAuth2Api": {
+          "id": "nke8QiYbYIUQAiQE",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "968f2a8c-b033-4769-ab10-e36d0a1cc459",
+              "leftValue": "={{ $('Nimbus Agent').item.json.output.lead.job_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "afefc781-0bc0-42e1-b7c2-761b006cbed8",
+              "leftValue": "={{ $('Loop Over Items1').item.json.description }}",
+              "rightValue": "={{ ($('Nimbus Agent').item.json.output.lead.company_name || \"\").split(\" \").join(\"|\") }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "853abe65-4718-466e-8a2a-f6adf24eec36",
+              "leftValue": "={{ $('Nimbus Agent').item.json.output.lead.company_name.match(/Not Identified|Not disclosed|Not known|None identified|Disclosed|No company|No brand|Twenty|GHL/i) ? true: false }}",
+              "rightValue": "=GHL|Not|identified",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a77c39aa-14f3-4559-84ae-9eda83fc61d9",
+              "leftValue": "={{ $('Nimbus Agent').item.json.output.lead.company_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "4165b23f-7036-470f-b2b1-b4144e1bd4c4",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        -128
+      ],
+      "id": "29f65df3-1b11-441d-a616-cdef68c84ef5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -224,
+        352
+      ],
+      "id": "2cc8e241-0ea3-415e-b4da-b38aca05c1df",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-a19db530-4223-4ddf-8ce5-0d54eb0f6f0c",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n \"Company\": $json.properties.company.value,\n \"id\": $json.vid,\n \"source_id\": $json.properties.source_id.value\n}.toJsonString() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1568,
+        48
+      ],
+      "id": "1a9438c4-f463-4224-ae97-25465f0c41e6",
+      "name": "Push to Clau"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "search",
+        "limit": 1,
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "source_id|string",
+                    "value": "={{ $json.output.lead.job_id}}@upwork.com"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -128
+      ],
+      "id": "edd6332b-436a-44a8-a731-a5be615ca25b",
+      "name": "Search contacts",
+      "alwaysOutputData": true,
+      "credentials": {
+        "hubspotOAuth2Api": {
+          "id": "nke8QiYbYIUQAiQE",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "968f2a8c-b033-4769-ab10-e36d0a1cc459",
+              "leftValue": "={{ $json.output.lead.job_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "afefc781-0bc0-42e1-b7c2-761b006cbed8",
+              "leftValue": "={{ $('Loop Over Items1').item.json.description }}",
+              "rightValue": "={{ ($json.output.lead.company_name || \"\").split(\" \").join(\"|\") }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "853abe65-4718-466e-8a2a-f6adf24eec36",
+              "leftValue": "={{ $json.output.lead.company_name.match(/Not Identified|Not disclosed|Not known|None identified|Disclosed|Not provided|Not Specified|No company|No brand|Twenty|GHL/i) ? true: false }}",
+              "rightValue": "=GHL|Not|identified",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a77c39aa-14f3-4559-84ae-9eda83fc61d9",
+              "leftValue": "={{ $json.output.lead.company_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "b68f48c7-f41b-43dc-8171-c8736dbafede",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "D82y1vW1HdkNyCZV",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/D82y1vW1HdkNyCZV",
+          "cachedResultName": "Nimbus Agent - 24/7 Employee"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mission": "=You are an experienced BDR qualifying job posts for cold outreach. A post is only worth outreach if the person who wrote it names the company they own or currently work at. Decide strictly from the job text below. Do not look anything up. \n\nReturn one lead object. \n\nJob: {{ $json.toJsonString() }}\n\nCOMPANY (company_name) \nSet it only if the poster clearly states, in their own words, the company they own, run or currently work at (\"I'm the founder of X\", \"we at X\", \"X is hiring\", a signature block). Copy it exactly, with the same spelling and casing.\nReturn an empty string when: \n\nthe name is a SaaS tool, platform, theme, template, plugin or service that the job uses or is about (Shopify, HubSpot, Zapier, Elementor, GoHighLevel, etc.)\nthe name is an example, inspiration or reference (\"like Airbnb\", \"similar to Stripe\") or a competitor\nthe name is the poster's past employer, or a company they only want to work with\nthe poster is an agency working for a client: use the agency they work at, never the client. If only the client is named, return empty.\nthe poster is an individual or freelancer who never names a business\nonly a generic word appears (\"our company\", \"startup\", \"agency\", \"the business\")\nyou would be guessing from context, emails, or writing style. If it is not stated, it is empty. The schema rejects these characters in a name: @ < > / \\ | [ ] ( ) + * ? ^ $ . If the real name contains any, remove only those characters and keep the rest.\nWEBSITE (company_website) \nOnly the poster's own company site as written in the job text, starting with https:// (add it if they wrote a bare domain, change nothing else). Never a social, Upwork, booking, portfolio or inspiration link. If company_name is empty, this is empty too. \n\nPOSTER (job_poster) \nThe poster's own name, only if they sign off or introduce themselves. Never the company name, and never inferred from an email or handle. Otherwise empty. \n\nJOB URL and JOB ID \nCopy job_url exactly as given, including the query string. job_id is digits only: strip a leading ~ and the 02 prefix if the input has them. \n\nJOB TITLE (job_title)  —  Multi-select array \nSelect  every  value from the Outreach Role enum that clearly matches the position being hired for. Use the exact  internalName values (e.g.,  n8n_developer,  hubspot_crm_specialist,  marketing_automation_specialist,  workflow_automation_specialist,  crm_integration_developer,  full_stack_developer, etc.). If nothing clearly fits, include  other. \n\nJOB FUNCTION (job_function)  —  Multi-select array \nSelect  every  value from the Job Function enum that genuinely applies to the role's primary focus areas. Use exact  internalName values (e.g.,  crm_automation,  workflow_automation,  marketing_automation,  sales_operations,  integration_engineering,  website_development, etc.). If nothing clearly fits, include  other. \n\nSKILLS (skills)  —  Multi-select array \nInclude  every  tool or skill explicitly required or named in the job text that exists in the Skills enum. Use the poster's own words matched to exact  internalName values (e.g.,  n8n,  hubspot,  gohighlevel,  zapier,  python,  react,  aws,  docker). Only include what's stated in the text — never inferred. Empty array if none match. \n\nINDUSTRY (industry) \nIf company_name is set and company_website is known, use web_search_exa and web_fetch_exa to confirm what the company actually does, then return an array of every closest-fitting value that genuinely applies: technology, healthcare, finance, ecommerce, real_estate, marketing_agency, recruitment, sales_and_marketing, education, hospitality, professional_services, other. Most companies will only need one value — only add a second when both are clearly true. If company_name is empty or you can't confirm from a real source, return [\"other\"]. \n\nCONFIDENCE (confidence) \nhigh = job_title, job_function, and skills stated explicitly and unambiguously in the text. medium = reasonably inferred from context. low = weak or guessed. \n\nREASON (always required, plain text, 30 to 600 characters) \n\nIf company_name is set: quote the poster's exact words showing they own or work at that company, then say why it is not a tool, theme, template, example or client. Also cover the evidence behind job_title, job_function, and skills selections.\nIf it is empty: say what you checked and why no own company was named. Start with the finding itself, never with \"Explain\", \"N/A\", \"TBD\" or \"Unknown\".\nBe conservative. A wrong company wastes an outreach, while an empty result costs nothing. When torn between a name and an empty string, choose empty. Same for industry — when torn, use [\"other\"].\nIf a submission is rejected, read the error, fix only the field it names and resubmit. Never bend the facts to pass a rule. An empty string is always valid for company_name, company_website and job_poster. ",
+            "allowedTools": "={{[\"exa-mcp_web_search_exa\"]}}",
+            "maxIterations": 30,
+            "outputSchema": "={{ \n{\n  \"type\": \"object\",\n  \"required\": [\"lead\"],\n  \"properties\": {\n    \"lead\": {\n      \"type\": \"object\",\n      \"required\": [\n        \"company_name\",\n        \"company_website\",\n        \"job_poster\",\n        \"job_url\",\n        \"job_id\",\n        \"job_title\",\n        \"job_function\",\n        \"skills\",\n        \"industry\",\n        \"confidence\",\n        \"reason\"\n      ],\n      \"properties\": {\n        \"company_name\": {\n          \"type\": \"string\",\n          \"description\": \"Company the poster owns/runs/works at, copied exactly from job text. Empty string if not stated. Never a SaaS tool, theme, template, plugin, client, or generic word.\"\n        },\n        \"company_website\": {\n          \"type\": \"string\",\n          \"description\": \"Poster's own company website as written in job text, with https:// prepended if bare domain. Empty if company_name empty or not stated. Never social/Upwork/portfolio links.\"\n        },\n        \"job_poster\": {\n          \"type\": \"string\",\n          \"description\": \"Poster's own name only if they sign off or introduce themselves. Empty otherwise. Never company name, never inferred from email/handle.\"\n        },\n        \"job_url\": {\n          \"type\": \"string\",\n          \"description\": \"Job URL exactly as provided, including query string.\"\n        },\n        \"job_id\": {\n          \"type\": \"string\",\n          \"description\": \"Job ID digits only: strip leading ~ and 02 prefix if present.\"\n        },\n        \"job_title\": {\n          \"type\": \"array\",\n          \"description\": \"One or more job titles from the Outreach Role enum (outreach_role). Use exact internalName values. Multi-select — include every title that clearly matches the posting.\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"full_stack_developer\",\n              \"front_end_developer\",\n              \"back_end_developer\",\n              \"mobile_app_developer\",\n              \"web_designer\",\n              \"ux_ui_designer\",\n              \"ecommerce_developer\",\n              \"cms_developer\",\n              \"scripting_automation_developer\",\n              \"qa_testing_engineer\",\n              \"data_analyst\",\n              \"machine_learning_engineer\",\n              \"data_visualization_specialist\",\n              \"data_engineer\",\n              \"data_scientist\",\n              \"database_administrator\",\n              \"ai_ml_specialist\",\n              \"generative_ai_engineer\",\n              \"data_annotation_specialist\",\n              \"ai_integration_engineer\",\n              \"llm_fine_tuning_specialist\",\n              \"prompt_engineer\",\n              \"rag_engineer\",\n              \"hubspot_crm_specialist\",\n              \"gohighlevel_specialist\",\n              \"n8n_developer\",\n              \"marketing_automation_specialist\",\n              \"workflow_automation_specialist\",\n              \"crm_integration_developer\",\n              \"zapier_make_specialist\",\n              \"sales_operations_specialist\",\n              \"marketing_operations_specialist\",\n              \"lead_generation_specialist\",\n              \"campaign_management_specialist\",\n              \"email_marketing_specialist\",\n              \"seo_specialist\",\n              \"sem_specialist\",\n              \"social_media_marketing_specialist\",\n              \"devops_engineer\",\n              \"cloud_engineer\",\n              \"kubernetes_specialist\",\n              \"terraform_specialist\",\n              \"system_administrator\",\n              \"information_security_specialist\",\n              \"digital_project_manager\",\n              \"technical_project_manager\",\n              \"development_it_project_manager\",\n              \"genera
