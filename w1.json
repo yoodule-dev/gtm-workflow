@@ -1,0 +1,403 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 45
+            }
+          ]
+        }
+      },
+      "id": "91899a7d-dd7d-420d-967c-38614702476c",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -896,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()"
+      },
+      "id": "6d7cf1c1-4571-4ae3-948d-5ac8daa1687c",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "968f2a8c-b033-4769-ab10-e36d0a1cc459",
+              "leftValue": "={{ $json.output.lead.job_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "afefc781-0bc0-42e1-b7c2-761b006cbed8",
+              "leftValue": "={{ $('Loop Over Items1').item.json.description }}",
+              "rightValue": "={{ ($json.output.lead.company_name || \"\").split(\" \").join(\"|\") }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "853abe65-4718-466e-8a2a-f6adf24eec36",
+              "leftValue": "={{ $json.output.lead.company_name.match(/Not Identified|Not disclosed|Not known|None identified|Disclosed|Not provided|Not Specified|No company|No brand|Twenty|GHL/i) ? true: false }}",
+              "rightValue": "=GHL|Not|identified",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a77c39aa-14f3-4559-84ae-9eda83fc61d9",
+              "leftValue": "={{ $json.output.lead.company_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e9af7c4a-eaa7-4155-9049-6ffdb097fe2e",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "search",
+        "limit": 1,
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "source_id|string",
+                    "value": "={{ $json.output.lead.job_id}}@upwork.com"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "id": "0ccfa8e7-7725-4192-8264-71a7cb9c6b8e",
+      "name": "Search contacts",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        96
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "hubspotOAuth2Api": {
+          "id": "nke8QiYbYIUQAiQE",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "968f2a8c-b033-4769-ab10-e36d0a1cc459",
+              "leftValue": "={{ $('Nimbus Agent').item.json.output.lead.job_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "afefc781-0bc0-42e1-b7c2-761b006cbed8",
+              "leftValue": "={{ $('Loop Over Items1').item.json.description }}",
+              "rightValue": "={{ ($('Nimbus Agent').item.json.output.lead.company_name || \"\").split(\" \").join(\"|\") }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "853abe65-4718-466e-8a2a-f6adf24eec36",
+              "leftValue": "={{ $('Nimbus Agent').item.json.output.lead.company_name.match(/Not Identified|Not disclosed|Not known|None identified|Disclosed|No company|No brand|Twenty|GHL/i) ? true: false }}",
+              "rightValue": "=GHL|Not|identified",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a77c39aa-14f3-4559-84ae-9eda83fc61d9",
+              "leftValue": "={{ $('Nimbus Agent').item.json.output.lead.company_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "4165b23f-7036-470f-b2b1-b4144e1bd4c4",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "fd5bc434-9475-4dd6-9290-234877e2536b",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "D82y1vW1HdkNyCZV",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/D82y1vW1HdkNyCZV",
+          "cachedResultName": "Nimbus Agent - 24/7 Employee"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "allowedTools": "={{[\"upwork-mcp_upwork__find_freelancers\"]}}",
+            "maxIterations": 30,
+            "model": "openrouter/free",
+            "mission": "=# ROLE & MISSION\nAct as a persistent, elite Talent-Sourcing Researcher for a branded outreach campaign. Your objective is to shortlist **2-3 real Upwork freelancers** who have explicitly executed and delivered the exact outcomes this client needs. \n\n# INPUT DATA (CONTEXT)\n- **Qualified Lead (Raw JSON):** {{ $json.toJsonString() }}\n- **Job Description:** {{ $json.properties.hs_content_membership_notes }}\n- **Client-Stated Skills:** {{ ($json.properties.contact_skills || []).toJsonString() }}\n- **Lead Job Functions:** {{ ($json.properties.contact_job_function || []).toJsonString() }}\n- **Lead Roles:** {{ ($json.properties.outreach_role || []).toJsonString() }}\n\n---\n\n# MANDATORY CONNECTION & TOOL DETAILS\n- **Upwork org_uid:** `1053967069020925952` (Must be sent as a **quoted string** on EVERY call to `upwork__find_freelancers`).\n- **Error Handling:** If you encounter `ORG_UID_REQUIRED`, do NOT call `list_accounts` (you do not have this tool). Re-try the call ensuring `org_uid` is placed at the top-level.\n- **Allowed Actions:** `search` and `get_profile` ONLY. Never use `smart_search`.\n- **Payload Structure:** Top-level fields must only be `action`, `org_uid`, and `params`. Filters (e.g., `query`, `skills`, `limit`) go inside `params` only.\n\n### Call Syntax Reference\n* **Search Call Shape:**\n```json\n{\n  \"action\": \"search\",\n  \"org_uid\": \"1053967069020925952\",\n  \"params\": {\n    \"query\": \"B2B sales consultant\",\n    \"skills\": [\"Lead Generation\"],\n    \"talent_type\": \"freelancer\",\n    \"limit\": 10,\n    \"offset\": 0\n  }\n}\n```\n* **Get Profile Shape:**\n```json\n{\n  \"action\": \"get_profile\",\n  \"org_uid\": \"1053967069020925952\",\n  \"params\": { \"profile_key\": \"~01abc123example\" }\n}\n```\n\n---\n\n# THE STANDARD OF PROOF (CRITICAL)\nA freelancer's title, bio, JSS, badges, rates, or listed skills are **never** proof of fit. They are only discovery mechanisms. \n* **Acceptable Proof:** A verifiable contract in `work_history` (via contract title, description, or client review) or a validated `portfolio` project proving execution.\n* **Client Reviews = Hard Proof:** If a client review explicitly describes the freelancer doing the work, it counts as absolute proof even if the contract title is vague.\n* **Domain Alignment:** The industry domain must match or be directly equivalent (e.g., software sales, IT sales, and tech agency sales are equivalent; real estate sales vs. software sales is not).\n* **Zero Speculation:** Do not infer capability. Never use terms like *\"likely\"*, *\"probably\"*, or *\"should be able to\"*. If it is not explicitly in the text, it is unproven.\n\n---\n\n# EXECUTION WORKFLOW\n\n### Step 1: Extract Criteria\nIsolate up to **4 client_criteria** from the job description. Phrase them as concrete, short deliverables or outcomes (not abstract personality traits).\n\n### Step 2: Search Ladder & Minimum Effort\nYou **must** fulfill these threshold minimums before delivering a final list:\n1. Run at least **10 distinct search calls** using the Search Ladder variations below.\n2. Inspect at least **20 distinct profiles** using `get_profile`.\n3. *Exception:* You may stop early only if you find 3 fully proven candidates, or 2 fully proven candidates after 8 searches and 15 profile reviews.\n\n| Phase | Strategy | Example/Execution |\n| :--- | :--- | :--- |\n| **A. Role Angles** | Search job titles and adjacent fractional/contract roles. | \"business development\", \"outbound sales\", \"fractional sales\" |\n| **B. Domain Angles** | Combine role title with target industry keywords. | \"software sales\", \"IT services sales\", \"tech sales\" |\n| **C. Skill-Only** | Clear the query text; filter by 1-2 platform skills. | Skills: `[\"Lead Generation\", \"Cold Calling\"]` |\n| **D. Title Angles** | Use the `title` parameter filter for headlines. | Title filter: \"Business Development\" or \"Growth\" |\n| **E. Pagination** | Deep dive into the top 3 best-performing queries. | Change `offset` to `10`, then `20` to view deeper pages. |\n| **F. Relaxation** | If results dry up, drop `job_success_min` and drop to 1 or 0 skills. | Broadens top-of-funnel discovery. |\n\n---\n\n# FINAL OUTPUT SPECIFICATION\nFormat your final recommendation exactly as follows for the 2-3 chosen candidates:\n\n- **name:** [Freelancer Name]\n- **profile_url:** [URL if provided by tool, otherwise: https://www.upwork.com/freelancers/<profile_key>]\n- **how_they_meet:** For EVERY item extracted in Step 1, map out the validation. \n  * *Format:* `Criterion` -> `[Contract/Project Title]` -> `[What it explicitly delivered / Relevant text from client review]`\n  * *(Reminder: A listed skill is never acceptable here).*\n\n# ABSOLUTE HARD RULES\n- Use ONLY freelancers the tool actually returned. \n- Never invent a person, URL, project, review, or history item. \n- Returning an empty list without exhausting the minimum effort thresholds is an absolute execution failure.\n",
+            "outputSchema": "={{ \n  {\n    \"type\": \"object\",\n    \"required\": [\n      \"client_criteria\",\n      \"talents\",\n      \"reasoning\"\n    ],\n    \"properties\": {\n      \"client_criteria\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"string\"\n        },\n        \"description\": \"The client's explicit hiring criteria extracted from the job post.\"\n      },\n      \"talents\": {\n        \"type\": \"array\",\n        \"minItems\": 0,\n        \"maxItems\": 3,\n        \"items\": {\n          \"type\": \"object\",\n          \"required\": [\n            \"name\",\n            \"profile_url\",\n            \"how_they_meet\"\n          ],\n          \"properties\": {\n            \"name\": {\n              \"type\": \"string\"\n            },\n            \"profile_url\": {\n              \"type\": \"string\",\n              \"pattern\": \"^https:\\\\/\\\\/(www\\\\.)?upwork\\\\.com\\\\/freelancers\\\\/~[0-9a-fA-F]{16,18}$\",\n              \"description\": \"Upwork profile URL validating a standard 16 to 18 character ciphertext format after the tilde.\"\n            },\n            \"how_they_meet\": {\n              \"type\": \"string\",\n              \"description\": \"Per-criterion evidence that this freelancer meets every client criterion.\"\n            }\n          }\n        }\n      },\n      \"reasoning\": {\n        \"type\": \"string\",\n        \"minLength\": 10\n      }\n    }\n  }\n}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mission",
+              "displayName": "mission",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "allowedTools",
+              "displayName": "allowedTools",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "outputSchema",
+              "displayName": "outputSchema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "maxIterations",
+              "displayName": "maxIterations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "model",
+              "displayName": "model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "d686c580-a8b1-48b7-a8c7-7393563b9642",
+      "name": "Find Talent",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "a1f0c2d4-7b1e-4c55-9a10-0000000000a1",
+                    "leftValue": "={{ (() => { const l = $('Nimbus Agent').item.json.output.lead; const j = $('Loop Over Items1').item.json; const txt = (j.title || '') + ' ' + (j.description || ''); return (l.industry || []).includes('recruitment') || /recruitment (agency|firm|business|company|process|pipeline|workflow)|recruiting (agency|firm|business|company)|staffing (agency|firm|company)|talent acquisition|applicant tracking|\\bATS\\b|candidate (pipeline|sourcing|screening|database)|headhunt|executive search/i.test(txt); })() }}",
+                    "operator": {
+                      "operation": "true",
+                      "singleValue": true,
+                      "type": "boolean"
+                    },
+                    "rightValue": ""
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                }
+              },
+              "renameOutput": true,
+              "outputKey": "Recruitment"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "a1f0c2d4-7b1e-4c55-9a10-0000000000a2",
+                    "leftValue": "={{ (() => { const l = $('Nimbus Agent').item.json.output.lead; const j = $('Loop Over Items1').item.json; return (l.skills || []).some(s => ['wordpress','elementor','woocommerce'].includes(s)) || (l.job_title || []).includes('cms_developer') || /wordpress|woocommerce|elementor/i.test(j.title || ''); })() }}",
+                    "operator": {
+                      "operation": "true",
+                      "singleValue": true,
+                      "type": "boolean"
+                    },
+                    "rightValue": ""
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                }
+              },
+              "renameOutput": true,
+              "outputKey": "WordPress"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "a1f0c2d4-7b1e-4c55-9a10-0000000000a3",
+                    "leftValue": "={{ (() => { const l = $('Nimbus Agent').item.json.output.lead; return (l.job_function || []).includes('crm_automation') || (l.job_title || []).some(t => ['hubspot_crm_specialist','gohighlevel_specialist','crm_integration_developer'].includes(t)) || (l.skills || []).some(s => ['hubspot','gohighlevel','salesforce','zoho_crm','pipedrive','activecampaign'].includes(s)); })() }}",
+                    "operator": {
+                      "operation": "true",
+                      "singleValue": true,
+                      "type": "boolean"
+                    },
+                    "rightValue": ""
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                }
+              },
+              "renameOutput": true,
+              "outputKey": "CRM Automation"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "No category"
+        }
+      },
+      "id": "92fea4c0-8c58-4d75-9dcc-a9f7707564eb",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "D82y1vW1HdkNyCZV",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/D82y1vW1HdkNyCZV",
+          "cachedResultName": "Nimbus Agent - 24/7 Employee"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "allowedTools": "={{[\"notion-mcp_API-post-search\", \"notion-mcp_API-retrieve-a-page\"]}}",
+            "maxIterations": 30,
+            "mission": "=You are Sunday's outreach copywriter. Sunday is an operations manager who, for each qualified brand, has already had talent shortlisted from Upwork. Your job: write a 4-message cold outreach cadence that pitches those shortlisted talents to the brand. This lead was 
