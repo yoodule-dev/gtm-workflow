@@ -1,0 +1,311 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "mission"
+            },
+            {
+              "name": "allowedTools",
+              "type": "array"
+            },
+            {
+              "name": "outputSchema",
+              "type": "object"
+            },
+            {
+              "name": "maxIterations",
+              "type": "number"
+            },
+            {
+              "name": "model"
+            }
+          ]
+        }
+      },
+      "id": "e83397b5-bd5c-4d26-8fb7-df832de49fa9",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -592
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9b1405bf-4428-429a-a965-84394ef5fecd",
+              "name": "output",
+              "value": "={{ ($json.output || {}).toJsonString() }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "af0dde0e-c2b4-4f8a-8f93-26b575d0cd4f",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1088,
+        -592
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "={{ $('When Executed by Another Workflow').item.json.outputSchema?.toJsonString() }}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        -368
+      ],
+      "id": "08425f18-0213-4a7c-aee8-d580fd6cb674",
+      "name": "Structured Output Parser",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When Executed by Another Workflow').item.json.mission }}",
+        "hasOutputParser": true,
+        "options": {
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        -592
+      ],
+      "id": "ab34c911-8ed7-4477-9f72-58bf0a5a1137",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemma4:31b",
+          "mode": "list",
+          "cachedResultName": "gemma4:31b"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        -160
+      ],
+      "id": "b05666c7-a3d2-4c59-a45c-68e288ac4861",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "WtetNo4SC34qQ0m0",
+          "name": "LLM Proxy - Nimbus Gateway"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "cbb8455c-c6eb-4716-84f9-93b8f51622b6"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -48
+      ],
+      "id": "715e91ab-65a6-43fe-8350-3e759dd643b0",
+      "name": "MCP Server Trigger",
+      "webhookId": "cbb8455c-c6eb-4716-84f9-93b8f51622b6"
+    },
+    {
+      "parameters": {
+        "description": "Do not call tool, it does nothing."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        176
+      ],
+      "id": "0bc015d3-9ff1-493d-9779-1ccbb26c03f7",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "={{ \n  (() => {\n    const filtered = $('When Executed by Another Workflow').item.json.allowedTools.filter(item => item.startsWith(\"upwork-mcp_\")).map(item => item.replace(\"upwork-mcp_\",\"\"));\n    return filtered.length ? \"https://mcp.upwork.com/mcp\": \"https://yoodule.app.n8n.cloud/mcp/cbb8455c-c6eb-4716-84f9-93b8f51622b6\";\n})()\n}}",
+        "authentication": "mcpOAuth2Api",
+        "include": "={{ \n  (() => {\n    const filtered = $('When Executed by Another Workflow').item.json.allowedTools.filter(item => item.startsWith(\"upwork-mcp_\")).map(item => item.replace(\"upwork-mcp_\",\"\"));\n    return filtered.length ? \"selected\": \"all\";\n})()\n}}",
+        "includeTools": "={{ \n  (() => {\n    const filtered = $('When Executed by Another Workflow').item.json.allowedTools.filter(item => item.startsWith(\"upwork-mcp_\")).map(item => item.replace(\"upwork-mcp_\",\"\"));\n    return filtered.length ? filtered: [];\n})()\n}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        -368
+      ],
+      "id": "4c52ca1d-adf6-41b8-a97c-2f2f21d54053",
+      "name": "Upwork MCP",
+      "credentials": {
+        "mcpOAuth2Api": {
+          "id": "ZrxlpJwpWpOYWkdt",
+          "name": "Upwork credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "={{ \n  (() => {\n    const filtered = $('When Executed by Another Workflow').item.json.allowedTools.filter(item => item.startsWith(\"exa-mcp_\")).map(item => item.replace(\"exa-mcp_\",\"\"));\n    return filtered.length ? \"https://mcp.exa.ai/mcp\": \"https://yoodule.app.n8n.cloud/mcp/cbb8455c-c6eb-4716-84f9-93b8f51622b6\";\n})()\n}}",
+        "include": "={{ \n  (() => {\n    const filtered = $('When Executed by Another Workflow').item.json.allowedTools.filter(item => item.startsWith(\"exa-mcp_\")).map(item => item.replace(\"exa-mcp_\",\"\"));\n    return filtered.length ? \"selected\": \"all\";\n})()\n}}",
+        "includeTools": "={{ \n  (() => {\n    const filtered = $('When Executed by Another Workflow').item.json.allowedTools.filter(item => item.startsWith(\"exa-mcp_\")).map(item => item.replace(\"exa-mcp_\",\"\"));\n    return filtered.length ? filtered: [];\n})()\n}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        592,
+        -368
+      ],
+      "id": "ded97871-e509-4c3c-9983-06383eac73fd",
+      "name": "Exa MCP"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        -592
+      ],
+      "id": "5733484f-fea6-47dd-9dd6-bc5e9b8cfa39",
+      "name": "Defaults"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Defaults",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upwork MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exa MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Defaults": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d09bf1bc67d8bec6b2479a4972ab1c7989cd32be4b9c5ac042173aa7171c4ea4"
+  }
+    }
