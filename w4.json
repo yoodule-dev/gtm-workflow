@@ -1,0 +1,202 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "4d5d4623-04d2-4695-a7aa-661bfcc42ba6",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "D82y1vW1HdkNyCZV",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/D82y1vW1HdkNyCZV",
+          "cachedResultName": "Nimbus Agent - 24/7 Employee"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mission": "You are sourcing outbound leads from LinkedIn. Use the linkedin-mcp_search_posts tool to search LinkedIn for recent posts where someone says they are hiring. Call it multiple times with different phrasings of the keywords argument (e.g. \"hiring\", \"we're hiring\", \"looking to hire\") and date_posted=\"past_week\", sort_by=\"latest\".\n\nFrom the raw text results, extract every distinct post you can clearly identify. For each one, return:\n- post_url: the exact LinkedIn post URL\n- post_id: the numeric activity ID parsed out of post_url (the digits in the \"-activity-<ID>-\" segment)\n- poster_name: the poster's display name as shown\n- poster_profile_url: the poster's own /in/<username>/ profile URL — never the post URL, never a company page URL\n- post_text: the post's text content\n\nOnly include posts written by an individual person announcing THEY are hiring (first person: \"I'm hiring\", \"we're hiring at my startup\", a founder/operator signing off). Skip posts from company pages, job-board reposts, or posts you can't confidently attribute to a specific person's own profile. Do not evaluate whether the poster is a recruiter here — just collect the candidate posts; that judgment happens later.",
+            "allowedTools": "={{ [\"linkedin-mcp_search_posts\"] }}",
+            "maxIterations": 15,
+            "outputSchema": "={{ {\n  \"type\": \"object\",\n  \"required\": [\"posts\"],\n  \"properties\": {\n    \"posts\": {\n      \"type\": \"array\",\n      \"description\": \"Every distinct hiring post found, written by an individual (not a company page).\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"post_url\",\n          \"post_id\",\n          \"poster_name\",\n          \"poster_profile_url\",\n          \"post_text\"\n        ],\n        \"properties\": {\n          \"post_url\": {\n            \"type\": \"string\",\n            \"description\": \"Exact LinkedIn post URL.\",\n            \"nimbus_rules\": [\"url\", \"max:2000\"]\n          },\n          \"post_id\": {\n            \"type\": \"string\",\n            \"description\": \"Digits-only activity ID parsed from post_url.\",\n            \"nimbus_rules\": [\"min:1\", \"max:50\", \"in:digits_only\"]\n          },\n          \"poster_name\": {\n            \"type\": \"string\",\n            \"description\": \"Poster's display name.\",\n            \"nimbus_rules\": [\"min:1\", \"max:200\"]\n          },\n          \"poster_profile_url\": {\n            \"type\": \"string\",\n            \"description\": \"Poster's own /in/<username>/ profile URL (not the post URL).\",\n            \"nimbus_rules\": [\"url\", \"max:500\"]\n          },\n          \"post_text\": {\n            \"type\": \"string\",\n            \"description\": \"The post body text.\",\n            \"nimbus_rules\": [\"min:1\", \"max:50000\"]\n          }\n        }\n      },\n      \"nimbus_rules\": [\"min:1\"]\n    }\n  }\n}\n }}",
+            "model": "openrouter/free"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mission",
+              "displayName": "mission",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "allowedTools",
+              "displayName": "allowedTools",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "outputSchema",
+              "displayName": "outputSchema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "maxIterations",
+              "displayName": "maxIterations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "model",
+              "displayName": "model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "f6f32121-abae-430c-b60e-2143ae982e95",
+      "name": "Search LinkedIn Posts",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.output.posts ?? [];"
+      },
+      "id": "f48971da-6c11-4f66-8acb-10028c7c3233",
+      "name": "Extract Posts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "D82y1vW1HdkNyCZV",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/D82y1vW1HdkNyCZV",
+          "cachedResultName": "Nimbus Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mission": "=You are an experienced BDR qualifying LinkedIn hiring posts for cold outreach. A post is only worth outreach if it was written by a real individual (a founder, operator, or employee) hiring for their own company — never a recruiter, staffing agency, or talent-acquisition professional posting on behalf of clients.\n\nPost: {{ $json.toJsonString() }}\n\nSTEP 1 — Look up the poster. Call linkedin-mcp_get_person_profile with the poster's LinkedIn username (parsed from poster_profile_url) and sections=\"experience\". Read their headline and current position.\n\nSTEP 2 — Decide is_recruiter. Set it true if their headline or current title contains any of: recruiter, talent acquisition, staffing, headhunter, HR consultant, people ops consultant — or their current employer is itself a staffing/recruiting agency. Otherwise false. If true, leave company_name and company_website empty and explain why in reason; do not proceed to step 3.\n\nSTEP 3 — company_name / company_website (only if is_recruiter is false). Set company_name to their current employer from the profile. If the post text itself names a different company they say they run or work at, and that reads more current than the profile, prefer the post's own words. Leave company_name empty rather than guess if you can't confidently identify a real operating company (\"self-employed\", a personal brand, or blank experience does not count). company_website: only if you can confidently identify or reasonably construct the poster's own company site; leave empty rather than guess.\n\njob_poster: the poster's own name. job_url / job_id: copy post_url and post_id from the input exactly, unchanged.\n\nreason (30-600 chars, required): cite what the profile lookup showed and why you did or didn't call them a recruiter, and why company_name is set or left empty.\n\nBe conservative. A missed lead costs nothing; a wrong company or a wrongly-included recruiter wastes outreach. When torn, leave company_name empty and only mark is_recruiter true on real signal, never a guess.",
+            "allowedTools": "={{ [\"linkedin-mcp_get_person_profile\"] }}",
+            "maxIterations": 15,
+            "outputSchema": "={{ \n{\n  \"type\": \"object\",\n  \"required\": [\"lead\"],\n  \"properties\": {\n    \"lead\": {\n      \"type\": \"object\",\n      \"required\": [\n        \"company_name\",\n        \"company_website\",\n        \"job_poster\",\n        \"job_url\",\n        \"job_id\",\n        \"job_title\",\n        \"job_function\",\n        \"skills\",\n        \"industry\",\n        \"confidence\",\n        \"reason\"\n      ],\n      \"properties\": {\n        \"company_name\": {\n          \"type\": \"string\",\n          \"description\": \"Company the poster owns/runs/works at, copied exactly from job text. Empty string if not stated. Never a SaaS tool, theme, template, plugin, client, or generic word.\"\n        },\n        \"company_website\": {\n          \"type\": \"string\",\n          \"description\": \"Poster's own company website as written in job text, with https:// prepended if bare domain. Empty if company_name empty or not stated. Never social/Upwork/portfolio links.\"\n        },\n        \"job_poster\": {\n          \"type\": \"string\",\n          \"description\": \"Poster's own name only if they sign off or introduce themselves. Empty otherwise. Never company name, never inferred from email/handle.\"\n        },\n        \"job_url\": {\n          \"type\": \"string\",\n          \"description\": \"Job URL exactly as provided, including query string.\"\n        },\n        \"job_id\": {\n          \"type\": \"string\",\n          \"description\": \"Job ID digits only: strip leading ~ and 02 prefix if present.\"\n        },\n        \"job_title\": {\n          \"type\": \"array\",\n          \"description\": \"One or more job titles from the Outreach Role enum (outreach_role). Use exact internalName values. Multi-select — include every title that clearly matches the posting.\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"full_stack_developer\",\n              \"front_end_developer\",\n              \"back_end_developer\",\n              \"mobile_app_developer\",\n              \"web_designer\",\n              \"ux_ui_designer\",\n              \"ecommerce_developer\",\n              \"cms_developer\",\n              \"scripting_automation_developer\",\n              \"qa_testing_engineer\",\n              \"data_analyst\",\n              \"machine_learning_engineer\",\n              \"data_visualization_specialist\",\n              \"data_engineer\",\n              \"data_scientist\",\n              \"database_administrator\",\n              \"ai_ml_specialist\",\n              \"generative_ai_engineer\",\n              \"data_annotation_specialist\",\n              \"ai_integration_engineer\",\n              \"llm_fine_tuning_specialist\",\n              \"prompt_engineer\",\n              \"rag_engineer\",\n              \"hubspot_crm_specialist\",\n              \"gohighlevel_specialist\",\n              \"n8n_developer\",\n              \"marketing_automation_specialist\",\n              \"workflow_automation_specialist\",\n              \"crm_integration_developer\",\n              \"zapier_make_specialist\",\n              \"sales_operations_specialist\",\n              \"marketing_operations_specialist\",\n              \"lead_generation_specialist\",\n              \"campaign_management_specialist\",\n              \"email_marketing_specialist\",\n              \"seo_specialist\",\n              \"sem_specialist\",\n              \"social_media_marketing_specialist\",\n              \"devops_engineer\",\n              \"cloud_engineer\",\n              \"kubernetes_specialist\",\n              \"terraform_specialist\",\n              \"system_administrator\",\n              \"information_security_specialist\",\n              \"digital_project_manager\",\n              \"technical_project_manager\",\n              \"development_it_project_manager\",\n              \"general_virtual_assistant\",\n              \"executive_virtual_assistant\",\n              \"business_analyst\",\n              \"solution_architect\",\n              \"technical_consultant\",\n              \"integration_engineer\",\n              \"api_developer\",\n              \"webhook_automation_specialist\",\n              \"other\"\n            ]\n          },\n          \"minItems\": 1\n        },\n        \"job_function\": {\n          \"type\": \"array\",\n          \"description\": \"One or more business functions from the Job Function enum (contact_job_function). Multi-select — include every function that clearly applies.\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"crm_automation\",\n              \"website_development\",\n              \"marketing_automation\",\n              \"sales_operations\",\n              \"integration_engineering\",\n              \"workflow_automation\",\n              \"data_engineering\",\n              \"ai_ml_engineering\",\n              \"devops_infrastructure\",\n              \"project_management\",\n              \"business_analysis\",\n              \"technical_consulting\",\n              \"other\"\n            ]\n          },\n          \"minItems\": 1\n        },\n        \"skills\": {\n          \"type\": \"array\",\n          \"description\": \"Every tool/skill explicitly required or named in the job text that matches the Skills enum (contact_skills). Multi-select — use exact internalName values. Empty array if none match.\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"react\",\n              \"typescript\",\n              \"node_js\",\n              \"python\",\n              \"vue_js\",\n              \"next_js\",\n              \"aws\",\n              \"docker\",\n              \"rest_api\",\n              \"graphql\",\n              \"postgresql\",\n              \"mongodb\",\n              \"javascript\",\n              \"html_css\",\n              \"figma\",\n              \"n8n\",\n              \"hubspot\",\n              \"gohighlevel\",\n              \"zapier\",\n              \"make_integromat\",\n              \"salesforce\",\n              \"zoho_crm\",\n              \"pipedrive\",\n              \"activecampaign\",\n              \"mailchimp\",\n              \"klaviyo\",\n              \"clickfunnels\",\n              \"elementor\",\n              \"wordpress\",\n              \"shopify\",\n              \"woocommerce\",\n              \"webflow\",\n              \"wix\",\n              \"marketing_automation\",\n              \"lead_generation\",\n              \"email_marketing\",\n              \"seo\",\n              \"sem_ppc\",\n              \"social_media_marketing\",\n              \"campaign_management\",\n              \"analytics\",\n              \"google_analytics\",\n              \"google_ads\",\n              \"meta_ads\",\n              \"devops\",\n              \"ci_cd\",\n              \"kubernetes\",\n              \"terraform\",\n              \"ansible\",\n              \"jenkins\",\n              \"github_actions\",\n              \"azure\",\n              \"gcp\",\n              \"linux\",\n              \"data_analytics\",\n              \"machine_learning\",\n              \"deep_learning\",\n              \"generative_ai\",\n              \"data_engineering_skill\",\n              \"sql\",\n              \"pandas\",\n              \"numpy\",\n              \"tensorflow\",\n              \"pytorch\",\n              \"scikit_learn\",\n              \"api_integration\",\n              \"webhooks\",\n              \"automation\",\n              \"workflow_automation_skill\",\n              \"project_management_skill\",\n              \"business_analysis_skill\",\n              \"technical_writing\",\n              \"other_skill\"\n            ]\n          }\n        },\n        \"industry\": {\n          \"type\": \"array\",\n          \"description\": \"Company industry/industries confirmed via web search against their site. ['other'] if company_name empty or unconfirmed.\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"technology\",\n              \"healthcare\",\n              \"finance\",\n              \"ecommerce\",\n              \"real_estate\",\n              \"marketing_agency\",\n              \"recruitment\",\n              \"sales_and_marketing\",\n              \"education\",\n              \"hospitality\",\n              \"professional_services\",\n              \"other\"\n            ]\n          },\n          \"minItems\": 1\n        },\n        \"confidence\": {\n          \"type\": \"string\",\n          \"enum\": [\"high\", \"medium\", \"low\"],\n          \"description\": \"Confidence for job_title, job_function, skills only. high = explicit & unambiguous; medium = reasonably inferred; low = weak/guessed.\"\n        },\n        \"reason\": {\n          \"type\": \"string\",\n          \"description\": \"30–600 chars. If company_name set: quote exact words showing ownership/employment, why not a tool/template/client, and evidence for job_title/job_function/skills. If empty: what checked and why no own company named. Start with finding, never 'Explain/N/A/TBD/Unknown'.\",\n          \"minLength\": 30,\n          \"maxLength\": 600\n        }\n      }\n    }\n  }\n} \n}}",
+            "model": "openrouter/free"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mission",
+              "displayName": "mission",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "allowedTools",
+              "displayName": "allowedTools",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "outputSchema",
+              "displayName": "outputSchema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "maxIterations",
+              "displayName": "maxIterations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "model",
+              "displayName": "model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "d9735f1b-25be-4bfa-a81c-4f5ff102e8b6",
+      "name": "Qualify Lead",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        89
